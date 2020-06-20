@@ -1,5 +1,7 @@
 #!flask/bin/python
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from werkzeug import serving
+from OpenSSL import SSL
 import requests
 import os
 from dotenv import load_dotenv
@@ -8,9 +10,14 @@ load_dotenv() # Load environment variables
 app = Flask(__name__)
 certs_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/certs'
 
-@app.route('/hello-world')
-def hello_world():
+@app.route('/')
+def index():
     return "Hello, World!"
+
+@app.route('/foo', methods=['POST'])
+def json_post_test():
+    data = request.json
+    return jsonify(data)
 
 @app.route('/visa-api-test')
 def visa_api_test():
@@ -23,7 +30,8 @@ def visa_api_test():
     #verify = (certs_dir_path + '/DigiCertGlobalRootCA.crt'),
     r = requests.get(url,
         verify = (""),
-        cert = (certs_dir_path + '/cert.pem',certs_dir_path + '/key_54a11bcc-fab0-449d-9092-4fa83d6a557b.pem'),
+        cert = (certs_dir_path + '/visa-api/cert.pem',
+                certs_dir_path + '/visa-api/key_54a11bcc-fab0-449d-9092-4fa83d6a557b.pem'),
         headers = headers,
         auth = (user_id, password),
         data = body)
@@ -31,5 +39,12 @@ def visa_api_test():
     return r.content
 
 if __name__ == '__main__':
-    #app.run(debug=True,ssl_context=(certs_dir_path + '/server.crt',certs_dir_path + '/server.key'))
-    app.run(debug=True,ssl_context='adhoc')
+    ssl_context = (certs_dir_path + '/server.crt',certs_dir_path + '/server.key')
+    fullchainpath = os.getenv("fullchainpath")
+    privatekeypath = os.getenv("privatekeypath")
+    if fullchainpath is not None and privatekeypath is not None:
+        context = (fullchainpath, privatekeypath)
+    else:
+        context = None
+
+    app.run("0.0.0.0", 80, app, ssl_context=context)
