@@ -1,7 +1,5 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
-from werkzeug import serving
-from OpenSSL import SSL
 import requests
 import os
 from dotenv import load_dotenv
@@ -39,7 +37,6 @@ def visa_api_test():
     return r.content
 
 if __name__ == '__main__':
-    ssl_context = (certs_dir_path + '/server.crt',certs_dir_path + '/server.key')
     fullchainpath = os.getenv("fullchainpath")
     privatekeypath = os.getenv("privatekeypath")
     if fullchainpath is not None and privatekeypath is not None:
