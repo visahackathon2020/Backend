@@ -1,8 +1,9 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, fields, marshal
 import requests
 import os
+import sys
 from dotenv import load_dotenv
 import random, string
 
@@ -16,22 +17,37 @@ api = Api(app)
 # Fake database mock
 invoices = {'1':{'name':'Nikhil','token':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
             '2':{'name':'Ben','token':'12345678900000000000000000000000','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
+merchants = {}
 
-# Invoice RESTful resource Controller
-@api.resource('/invoices', '/invoices/<string:id>')
-class Invoice(Resource):
+# Argument parsers
+item_fields = {
+    'name': fields.String,
+    'price': fields.String,
+    'quantity': fields.String
+}
+
+merchant_info_fields = {
+    'name': fields.String,
+    'country': fields.String,
+    'BIN': fields.String,
+    'PAN': fields.String
+}
+
+invoice_fields = {
+    'name': fields.String,
+    'token': fields.String,
+    'amount': fields.String,
+    'items': fields.List(fields.Nested(item_fields))
+}
+
+# Merchants RESTful resource Controller
+@api.resource('/merchants', '/merchants/<string:id>')
+class Merchant(Resource):
     def get(self, id=None):
-        try:
-            return {id: invoices[id]}
-        except:
-            return {"method":"GET","status":"fail","id": id}
+        return {"method":"GET","status":"fail","id": id}
 
+    # Create a merchant info model
     def post(self, id=None):
-        # Generate unique id
-        while True:
-            test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
-            if test_id not in invoices:
-                break
         try:
             invoices[test_id] = request.form['data']
         except:
@@ -39,29 +55,52 @@ class Invoice(Resource):
         return {"method":"POST","status":"success","id": test_id}
 
     def delete(self, id=None):
-        try:
-            del invoices[id]
-        except:
-            return {"method":"DELETE","status":"fail","id": id}
         return {"method":"DELETE","status":"success","id": id}
 
     def put(self, id=None):
-        try:
-            invoices[id] = request.form['data']
-        except:
-            return {"method":"PUT","status":"fail","id": id}
         return {"method":"PUT","status":"success","id": id}
 
     def patch(self, id=None):
-        try:
-            invoices[id].update(request.form['data'])
-        except:
-            return {"method":"PATCH","status":"fail","id": id}
+        return {"method":"PATCH","status":"success","id": id}
+
+# Invoice RESTful resource Controller
+@api.resource('/invoices', '/invoices/<string:id>')
+class Invoice(Resource):
+    def get(self, id=None):
+        try: return {id: invoices[id]}
+        except: return {"method":"GET","status":"fail","id": id}
+
+    def post(self, id=None):
+        # Generate unique id
+        while True:
+            test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+            if test_id not in invoices:
+                break
+        try: invoices[test_id] = request.form['data']
+        except: return {"method":"POST","status":"fail","id": test_id,"msg":str(sys.exc_info())}
+        return {"method":"POST","status":"success","id": test_id}
+
+    def delete(self, id=None):
+        try: del invoices[id]
+        except: return {"method":"DELETE","status":"fail","id": id}
+        return {"method":"DELETE","status":"success","id": id}
+
+    def put(self, id=None):
+        try: invoices[id] = request.form['data']
+        except: return {"method":"PUT","status":"fail","id": id}
+        return {"method":"PUT","status":"success","id": id}
+
+    def patch(self, id=None):
+        try: invoices[id].update(request.form['data'])
+        except: return {"method":"PATCH","status":"fail","id": id}
         return {"method":"PATCH","status":"success","id": id}
 
 # Testing Flask
 @app.route('/')
 def index():
+    return "Hello, World!"
+@app.route('/hello-world')
+def hello_world():
     return "Hello, World!"
 
 # Testing visa API calls
