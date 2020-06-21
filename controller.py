@@ -17,14 +17,16 @@ api = Api(app)
 invoices = {'1':{'name':'Nikhil','token':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
             '2':{'name':'Ben','token':'12345678900000000000000000000000','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
 
-# Invoice RESTful Controller
+# Invoice RESTful resource Controller
+@api.resource('/invoices', '/invoices/<string:id>')
 class Invoice(Resource):
-    def get(self, id):
+    def get(self, id=None):
         try:
             return {id: invoices[id]}
         except:
             return {"method":"GET","status":"fail","id": id}
-    def post(self):
+
+    def post(self, id=None):
         # Generate unique id
         while True:
             test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
@@ -35,26 +37,27 @@ class Invoice(Resource):
         except:
             return {"method":"POST","status":"fail","id": test_id}
         return {"method":"POST","status":"success","id": test_id}
-    def delete(self, id):
+
+    def delete(self, id=None):
         try:
             del invoices[id]
         except:
             return {"method":"DELETE","status":"fail","id": id}
         return {"method":"DELETE","status":"success","id": id}
-    def put(self, id):
+
+    def put(self, id=None):
         try:
             invoices[id] = request.form['data']
         except:
             return {"method":"PUT","status":"fail","id": id}
         return {"method":"PUT","status":"success","id": id}
-    def patch(self, id):
+
+    def patch(self, id=None):
         try:
             invoices[id].update(request.form['data'])
         except:
             return {"method":"PATCH","status":"fail","id": id}
         return {"method":"PATCH","status":"success","id": id}
-
-api.add_resource(Invoice, '/invoices', '/invoices/<string:id>')
 
 # Testing Flask
 @app.route('/')
