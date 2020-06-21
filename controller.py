@@ -49,19 +49,19 @@ class Merchant(Resource):
     # Create a merchant info model
     def post(self, id=None):
         try:
-            invoices[test_id] = request.form['data']
+            merchants[id] = request.json
         except:
-            return {"method":"POST","status":"fail","id": test_id}
-        return {"method":"POST","status":"success","id": test_id}
+            return {"method":"POST","status":"fail","id": id}
+        return {"method":"POST","status":"success","id": id}
 
     def delete(self, id=None):
-        return {"method":"DELETE","status":"success","id": id}
+        return {"method":"DELETE","status":"fail","id": id}
 
     def put(self, id=None):
-        return {"method":"PUT","status":"success","id": id}
+        return {"method":"PUT","status":"fail","id": id}
 
     def patch(self, id=None):
-        return {"method":"PATCH","status":"success","id": id}
+        return {"method":"PATCH","status":"fail","id": id}
 
 # Invoice RESTful resource Controller
 @api.resource('/invoices', '/invoices/<string:id>')
@@ -76,23 +76,25 @@ class Invoice(Resource):
             test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
             if test_id not in invoices:
                 break
-        try: invoices[test_id] = request.form['data']
-        except: return {"method":"POST","status":"fail","id": test_id,"msg":str(sys.exc_info())}
+        try:
+            invoices[test_id] = request.json
+        except: return {"method":"POST","status":"fail","id": test_id}
         return {"method":"POST","status":"success","id": test_id}
 
     def delete(self, id=None):
-        try: del invoices[id]
+        try:
+            del invoices[id]
         except: return {"method":"DELETE","status":"fail","id": id}
         return {"method":"DELETE","status":"success","id": id}
 
     def put(self, id=None):
-        try: invoices[id] = request.form['data']
+        try: invoices[id] = request.json
         except: return {"method":"PUT","status":"fail","id": id}
         return {"method":"PUT","status":"success","id": id}
 
     def patch(self, id=None):
-        try: invoices[id].update(request.form['data'])
-        except: return {"method":"PATCH","status":"fail","id": id}
+        try: invoices[id].update(request.json)
+        except: return {"method":"PATCH","status":"fail","id": id, "msg":str(sys.exc_info())}
         return {"method":"PATCH","status":"success","id": id}
 
 # Testing Flask
