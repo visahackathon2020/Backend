@@ -1,22 +1,67 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
+from flask_restful import Resource, Api
 import requests
 import os
 from dotenv import load_dotenv
+import random, string
+
 
 load_dotenv() # Load environment variables
-app = Flask(__name__)
-certs_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/certs'
+certs_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/certs' # path to our certs
 
+app = Flask(__name__)
+api = Api(app)
+
+# Fake database mock
+invoices = {'1':{'name':'Nikhil','token':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
+            '2':{'name':'Ben','token':'12345678900000000000000000000000','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
+
+# Invoice RESTful Controller
+class Invoice(Resource):
+    def get(self, id):
+        try:
+            return {id: invoices[id]}
+        except:
+            return {"method":"GET","status":"fail","id": id}
+    def post(self):
+        # Generate unique id
+        while True:
+            test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+            if test_id not in invoices:
+                break
+        try:
+            invoices[test_id] = request.form['data']
+        except:
+            return {"method":"POST","status":"fail","id": test_id}
+        return {"method":"POST","status":"success","id": test_id}
+    def delete(self, id):
+        try:
+            del invoices[id]
+        except:
+            return {"method":"DELETE","status":"fail","id": id}
+        return {"method":"DELETE","status":"success","id": id}
+    def put(self, id):
+        try:
+            invoices[id] = request.form['data']
+        except:
+            return {"method":"PUT","status":"fail","id": id}
+        return {"method":"PUT","status":"success","id": id}
+    def patch(self, id):
+        try:
+            invoices[id].update(request.form['data'])
+        except:
+            return {"method":"PATCH","status":"fail","id": id}
+        return {"method":"PATCH","status":"success","id": id}
+
+api.add_resource(Invoice, '/invoices', '/invoices/<string:id>')
+
+# Testing Flask
 @app.route('/')
 def index():
     return "Hello, World!"
 
-@app.route('/foo', methods=['POST'])
-def json_post_test():
-    data = request.json
-    return jsonify(data)
-
+# Testing visa API calls
 @app.route('/visa-api-test')
 def visa_api_test():
     url = 'https://sandbox.api.visa.com/vdp/helloworld'
@@ -36,7 +81,9 @@ def visa_api_test():
 
     return r.content
 
+
 if __name__ == '__main__':
+    # Checks if we have environment variables set for our TLS keys (this is optional)
     fullchainpath = os.getenv("fullchainpath")
     privatekeypath = os.getenv("privatekeypath")
     if fullchainpath is not None and privatekeypath is not None:
@@ -44,4 +91,5 @@ if __name__ == '__main__':
     else:
         context = None
 
+    # Runs on port 80, switch to whatever you like
     app.run("0.0.0.0", 80, app, ssl_context=context)
