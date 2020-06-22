@@ -1,5 +1,6 @@
 python-dotenv
 flask
 flask-restful
+flask-cors
 pyopenssl
 coverage

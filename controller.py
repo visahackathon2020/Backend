@@ -1,6 +1,7 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, fields, marshal
+from flask_cors import CORS, cross_origin
 import requests
 import os
 import sys
@@ -15,12 +16,21 @@ certs_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/certs' # path t
 
 app = Flask(__name__)
 api = Api(app)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
 
 # Fake database mock
 invoices = {'1':{'merchantid':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
             '2':{'merchantid':'22222222222222222222222222222222','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]},
             '3':{'name':'Ben','bin':'1234','pan':'33333333333333333333333333333333','country':'us','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
-merchants = {}
+merchants = {'12345678900000000000000000000000':{'token':'44444444444444444444444444444444'},
+             '22222222222222222222222222222222':{'token':'55555555555555555555555555555555'}}
 
 # Schemas
 item_fields = {
@@ -51,7 +61,7 @@ invoice_no_account_fields = {
     'items': fields.List(fields.Nested(item_fields))
 }
 
-# This 
+# This wraps the resource class methods and returns the standard response
 def return_status(func):
     @wraps(func)
     def wrapper(*args, **kw):
@@ -119,22 +129,25 @@ def index():
 # Testing visa API calls
 @app.route('/visa-api-test')
 def visa_api_test():
-    url = 'https://sandbox.api.visa.com/vdp/helloworld'
+    return visa_api_call('https://sandbox.api.visa.com/vdp/helloworld').content
+
+def visa_api_call(url, methodType=requests.get, data=""):
     user_id = os.getenv("userid")
     password = os.getenv("password")
     headers = ""
-    body = ""
+    data = data
 
     #verify = (certs_dir_path + '/DigiCertGlobalRootCA.crt'),
-    r = requests.get(url,
+    r = methodType(url,
         verify = (""),
         cert = (certs_dir_path + '/visa-api/cert.pem',
                 certs_dir_path + '/visa-api/key_54a11bcc-fab0-449d-9092-4fa83d6a557b.pem'),
         headers = headers,
         auth = (user_id, password),
-        data = body)
+        data = data,
+        )
 
-    return r.content
+    return r
 
 
 if __name__ == '__main__':
