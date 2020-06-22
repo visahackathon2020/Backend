@@ -1,3 +1,4 @@
 .env
 .coverage
 __pycache__
+htmlcov

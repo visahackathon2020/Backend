@@ -1,4 +1,5 @@
 import sys
+import json
 import unittest
 from controller import app
 
@@ -10,7 +11,12 @@ class ServerTests(unittest.TestCase):
             response = self.tester.get('/', content_type='html/text')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data, b'Hello, World!')
-
+        should_receive_success()
+    def test_visa_api(self):
+        def should_receive_success():
+            response = self.tester.get('/visa-api-test')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(json.loads(response.data.decode('utf-8'))['message'],'helloworld')
         should_receive_success()
         
     def test_get(self):
@@ -20,70 +26,102 @@ class ServerTests(unittest.TestCase):
 class MerchantTests(unittest.TestCase):
     def setUp(self):
         self.tester = app.test_client(self)
+
     def test_get(self):
-        pass
+        response = self.tester.get('/merchants/1')
+        self.assertEqual(response.status_code, 200)
+
     def test_post(self):
-        pass
+        response = self.tester.post('/merchants',json={})
+        self.assertEqual(response.status_code, 200)
+
     def test_put(self):
-        pass
+        response = self.tester.put('/merchants',json={})
+        self.assertEqual(response.status_code, 200)
+
     def test_patch(self):
-        pass
+        response = self.tester.patch('/merchants',json={})
+        self.assertEqual(response.status_code, 200)
+
     def test_delete(self):
-        pass
+        response = self.tester.delete('/merchants',json={})
+        self.assertEqual(response.status_code, 200)
 
 
 class InvoiceTests(unittest.TestCase):
     def setUp(self):
         self.tester = app.test_client(self)
-        self.mock_json = {
-            "name": "Nikhil",
-            "token": "12345678900000000000000000000000",
+        self.mock_json_order_info = {
             "amount": "10",
-            "items": [
-                {
-                    "name": "taco",
-                    "price": "10",
-                    "quantity": "1"
-                }
-            ]
+            "items": [ {
+                "name": "taco",
+                "price": "10",
+                "quantity": "1"
+            } ]
         }
+        self.mock_json_with_account = dict(
+            {"merchantid": "12345678900000000000000000000000"},
+            **self.mock_json_order_info
+        )
+        self.mock_json_no_account = dict({
+            "bin": "123456",
+            "pan": "12345678900000000000000000000000",
+            "name": "Kyle",
+            "country": "us"},
+            **self.mock_json_order_info
+        )
 
 
     def test_get(self):
-        def should_get_correct_invoice():
+        def should_get_correct_invoice_with_account():
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, {'1':self.mock_json})
+            self.assertEqual(response.json, {'1':self.mock_json_with_account})
 
-        should_get_correct_invoice()
+        should_get_correct_invoice_with_account()
 
 
     def test_post(self):
-        json = {
-            "name": "Nikhil",
-            "token": "12345678900000000000000000000000",
-            "amount": "10",
-            "items": [
-                {
-                    "name": "taco",
-                    "price": "10",
-                    "quantity": "1"
-                }
-            ]
-        }
-
         def should_receive_success():
-            response = self.tester.post('/invoices', json=json)
+            response = self.tester.post('/invoices', json=self.mock_json_with_account)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'success')
+        def should_receive_success_no_account():
+            response = self.tester.post('/invoices', json=self.mock_json_no_account)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json['status'], 'success')
+        '''
+        def should_fail_if_invalid_record():
+            self.mock_json['invalidfield'] = 'foobar'
+            response = self.tester.post('/invoices', json=self.mock_json_no_account)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json['status'], 'fail')
+        '''
 
         should_receive_success()
+        should_receive_success_no_account()
+        #should_fail_if_invalid_record()
 
     def test_put(self):
-        pass
+        put_mock_json = dict(**self.mock_json_no_account)
+        put_mock_json['amount'] = '99'
+
+        def should_receive_success():
+            response = self.tester.put('/invoices/1', json=put_mock_json)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json['status'], 'success')
+            self.assertEqual(response.json['id'], '1')
+
+        def should_change_record():
+            response = self.tester.get('/invoices/1')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json, {'1':put_mock_json})
+
+        should_receive_success()
+        should_change_record()
 
     def test_patch(self):
-        json = {'name':'Kyle'}
+        json = {'amount':'20'}
 
         def should_receive_success():
             response = self.tester.patch('/invoices/1', json=json)
@@ -91,15 +129,15 @@ class InvoiceTests(unittest.TestCase):
             self.assertEqual(response.json['status'], 'success')
             self.assertEqual(response.json['id'], '1')
 
-        def should_change_name():
-            patch_mock_json = self.mock_json
-            patch_mock_json['name'] = 'Kyle'
+        def should_change_record():
+            patch_mock_json = dict(**self.mock_json_with_account)
+            patch_mock_json['amount'] = '20'
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, {'1':self.mock_json})
+            self.assertEqual(response.json, {'1':patch_mock_json})
 
         should_receive_success()
-        should_change_name()
+        should_change_record()
 
     def test_delete(self):
         def should_receive_success():
@@ -116,6 +154,7 @@ class InvoiceTests(unittest.TestCase):
 
         should_receive_success()
         should_no_longer_exist()
+
 
         
 if __name__ == '__main__':

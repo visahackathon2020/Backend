@@ -15,11 +15,12 @@ app = Flask(__name__)
 api = Api(app)
 
 # Fake database mock
-invoices = {'1':{'name':'Nikhil','token':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
-            '2':{'name':'Ben','token':'12345678900000000000000000000000','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
+invoices = {'1':{'merchantid':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
+            '2':{'merchantid':'22222222222222222222222222222222','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]},
+            '3':{'name':'Ben','bin':'1234','pan':'33333333333333333333333333333333','country':'us','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
 merchants = {}
 
-# Argument parsers
+# Schemas
 item_fields = {
     'name': fields.String,
     'price': fields.String,
@@ -33,8 +34,18 @@ merchant_info_fields = {
     'PAN': fields.String
 }
 
-invoice_fields = {
+invoice_with_account_fields = {
+    'merchantid': fields.String,
+    'token': fields.String,
+    'amount': fields.String,
+    'items': fields.List(fields.Nested(item_fields))
+}
+
+invoice_no_account_fields = {
     'name': fields.String,
+    'country': fields.String,
+    'BIN': fields.String,
+    'PAN': fields.String
     'token': fields.String,
     'amount': fields.String,
     'items': fields.List(fields.Nested(item_fields))
@@ -101,9 +112,6 @@ class Invoice(Resource):
 @app.route('/')
 def index():
     return "Hello, World!"
-@app.route('/hello-world')
-def hello_world():
-    return "Hello, World!"
 
 # Testing visa API calls
 @app.route('/visa-api-test')
@@ -136,4 +144,4 @@ if __name__ == '__main__':
         context = None
 
     # Runs on port 80, switch to whatever you like
-    app.run("0.0.0.0", 80, app, ssl_context=context)
+    app.run("0.0.0.0", 5000, app, ssl_context=context)
