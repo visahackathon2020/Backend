@@ -15,7 +15,7 @@ load_dotenv() # Load environment variables
 certs_dir_path = os.path.dirname(os.path.realpath(__file__)) + '/certs' # path to our certs
 
 app = Flask(__name__)
-api = Api(app)
+api = Api()
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -29,8 +29,9 @@ def after_request(response):
 
 from invoices import Invoice
 from merchants import Merchant
-api.add_resource(Invoice,'/invoices', '/invoices/<string:id>')
+api.add_resource(Invoice,'/invoices','/invoices/', '/invoices/<string:id>')
 api.add_resource(Merchant,'/merchants', '/merchants/<string:id>')
+api.init_app(app)
 
 # Testing Flask
 @app.route('/')
