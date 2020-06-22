@@ -3,16 +3,16 @@ Description of the purpose of this file
 '''
 from flask import jsonify, request
 from flask_restful import Resource
-from controller import api
 from db import invoices
 from helpers import decorate_all_methods, return_status
 import random, string
+import json
 
 # Invoice RESTful resource Controller
-@api.resource('/invoices', '/invoices/<string:id>')
 @decorate_all_methods(return_status)
 class Invoice(Resource):
     def get(self, id=None):
+        print('HELLLO')
         return {id: invoices[id]}
 
     def post(self, id=None):
@@ -21,8 +21,7 @@ class Invoice(Resource):
             id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
             if id not in invoices:
                 break
-        # Check that the data is in any valid form
-        invoices[id] = request.json
+        invoices[id] = json.loads(request.data)
         return {'invoiceCode':id}
 
     def delete(self, id=None):

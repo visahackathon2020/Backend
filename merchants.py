@@ -3,12 +3,10 @@ Description of the purpose of this file
 '''
 from flask import jsonify, request
 from flask_restful import Resource
-from controller import api
 from db import merchants
 from helpers import decorate_all_methods, return_status
 
 # Merchants RESTful resource Controller
-@api.resource('/merchants', '/merchants/<string:id>')
 @decorate_all_methods(return_status)
 class Merchant(Resource):
     def get(self, id=None):

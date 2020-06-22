@@ -88,6 +88,8 @@ class InvoiceTests(unittest.TestCase):
             response = self.tester.post('/invoices', json=self.mock_json_no_account)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'success')
+        def should_get_the_account_posted():
+            pass
         '''
         def should_fail_if_invalid_record():
             self.mock_json['invalidfield'] = 'foobar'

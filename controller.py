@@ -22,11 +22,15 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 @app.after_request
 def after_request(response):
     header = response.headers
+    header['Access-Control-Allow-Methods'] = '*'
+    header['Access-Control-Allow-Headers'] = '*'
     header['Access-Control-Allow-Origin'] = '*'
     return response
 
-import invoices
-import merchants
+from invoices import Invoice
+from merchants import Merchant
+api.add_resource(Invoice,'/invoices', '/invoices/<string:id>')
+api.add_resource(Merchant,'/merchants', '/merchants/<string:id>')
 
 # Testing Flask
 @app.route('/')

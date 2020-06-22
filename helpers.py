@@ -2,6 +2,7 @@
 Description of the purpose of this file
 '''
 from functools import wraps
+import sys
 
 # This decorates all the methods of a class
 def decorate_all_methods(function_decorator):
@@ -21,7 +22,7 @@ def return_status(func):
             status = 'success'
         except:
             status = 'fail'
-            res = ''
+            res = str(sys.exc_info())
         finally:
             id = '' if 'id' not in kw else str(kw['id'])
             return {'method':func.__name__.upper(), 'status':status, 'id':id, 'result':'' if res is None else res}
