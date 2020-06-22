@@ -1,14 +1,14 @@
 #!flask/bin/python
-from flask import Flask, jsonify, request
-from flask_restful import Resource, Api, fields, marshal
+''' controller.py
+Description of the purpose of this file
+'''
+from flask import Flask
+from flask_restful import Api
 from flask_cors import CORS, cross_origin
 import requests
 import os
 import sys
 from dotenv import load_dotenv
-import random, string
-from helpers import decorate_all_methods
-from functools import wraps
 
 
 load_dotenv() # Load environment variables
@@ -25,103 +25,8 @@ def after_request(response):
     header['Access-Control-Allow-Origin'] = '*'
     return response
 
-# Fake database mock
-invoices = {'1':{'merchantid':'12345678900000000000000000000000','amount':'10','items':[{'name':'taco','price':'10','quantity':'1'}]},
-            '2':{'merchantid':'22222222222222222222222222222222','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]},
-            '3':{'name':'Ben','bin':'1234','pan':'33333333333333333333333333333333','country':'us','amount':'6.28','items':[{'name':'fries','price':'3.14','quantity':'2'}]}}
-merchants = {'12345678900000000000000000000000':{'token':'44444444444444444444444444444444'},
-             '22222222222222222222222222222222':{'token':'55555555555555555555555555555555'}}
-
-# Schemas
-item_fields = {
-    'name': fields.String,
-    'price': fields.String,
-    'quantity': fields.String
-}
-
-merchant_info_fields = {
-    'name': fields.String,
-    'country': fields.String,
-    'BIN': fields.String,
-    'PAN': fields.String
-}
-
-invoice_with_account_fields = {
-    'merchantid': fields.String,
-    'amount': fields.String,
-    'items': fields.List(fields.Nested(item_fields))
-}
-
-invoice_no_account_fields = {
-    'name': fields.String,
-    'country': fields.String,
-    'BIN': fields.String,
-    'PAN': fields.String,
-    'amount': fields.String,
-    'items': fields.List(fields.Nested(item_fields))
-}
-
-# This wraps the resource class methods and returns the standard response
-def return_status(func):
-    @wraps(func)
-    def wrapper(*args, **kw):
-        try:
-            res = func(*args, **kw)
-            status = 'success'
-        except:
-            status = 'fail'
-            res = ''
-        finally:
-            id = '' if 'id' not in kw else str(kw['id'])
-            return {'method':func.__name__.upper(), 'status':status, 'id':id, 'result':'' if res is None else res}
-    return wrapper
-
-
-# Merchants RESTful resource Controller
-@api.resource('/merchants', '/merchants/<string:id>')
-@decorate_all_methods(return_status)
-class Merchant(Resource):
-    def get(self, id=None):
-        return None
-
-    # Create a merchant info model
-    def post(self, id=None):
-        return None
-
-    def delete(self, id=None):
-        return None
-
-    def put(self, id=None):
-        return None
-
-    def patch(self, id=None):
-        return None
-
-# Invoice RESTful resource Controller
-@api.resource('/invoices', '/invoices/<string:id>')
-@decorate_all_methods(return_status)
-class Invoice(Resource):
-    def get(self, id=None):
-        return {id: invoices[id]}
-
-    def post(self, id=None):
-        # Generate unique id
-        while True:
-            id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
-            if id not in invoices:
-                break
-        # Check that the data is in any valid form
-        invoices[id] = request.json
-        return {'invoiceCode':id}
-
-    def delete(self, id=None):
-        del invoices[id]
-
-    def put(self, id=None):
-        invoices[id] = request.json
-
-    def patch(self, id=None):
-        invoices[id].update(request.json)
+import invoices
+import merchants
 
 # Testing Flask
 @app.route('/')
@@ -161,5 +66,5 @@ if __name__ == '__main__': # pragma: no cover
     else:
         context = None
 
-    # Runs on port 80, switch to whatever you like
+    # Runs on port 5000, switch to whatever you like
     app.run("0.0.0.0", 5000, app, ssl_context=context)
