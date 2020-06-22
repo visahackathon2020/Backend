@@ -58,7 +58,7 @@ class InvoiceTests(unittest.TestCase):
             "invoiceDesc": "1 taco for 10 dollars"
         }
         self.mock_json_with_account = dict(
-            {"merchantid": "12345678900000000000000000000000"},
+            {"name":"Kyle","merchantid": "12345678900000000000000000000000"},
             **self.mock_json_order_info
         )
         self.mock_json_no_account = dict({
