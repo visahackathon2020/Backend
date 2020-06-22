@@ -13,7 +13,6 @@ import json
 @decorate_all_methods(return_status)
 class Invoice(Resource):
     def get(self, id=None):
-        print('HELLLO')
         return {'nameOfId':id,
                 'invoiceObj':invoices[id]}
 

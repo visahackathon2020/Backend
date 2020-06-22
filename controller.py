@@ -29,7 +29,7 @@ def after_request(response):
 
 from invoices import Invoice
 from merchants import Merchant
-api.add_resource(Invoice,'/invoices', '/invoices/<string:id>')
+api.add_resource(Invoice,'/invoices','/invoices/', '/invoices/<string:id>')
 api.add_resource(Merchant,'/merchants', '/merchants/<string:id>')
 api.init_app(app)
 
