@@ -13,7 +13,8 @@ import json
 class Invoice(Resource):
     def get(self, id=None):
         print('HELLLO')
-        return {id: invoices[id]}
+        return {'nameOfId':id,
+                'invoiceObj':invoices[id]}
 
     def post(self, id=None):
         # Generate unique id
