@@ -1,6 +1,14 @@
 ''' db.py
 '''
 from flask_restful import fields
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+cred = credentials.Certificate("./certs/firebase/phonepayhack-firebase-adminsdk-ovw0a-fdd73540c4.json")
+firebase_admin.initialize_app(cred)
+
+database = firestore.client()
 
 # Fake database mock
 invoices = {'1':{'name':'Kyle','merchantid':'12345678900000000000000000000000','invoiceAmt':'10','invoiceDesc':'1 taco for 10 dollars'},
