@@ -76,7 +76,7 @@ class InvoiceTests(unittest.TestCase):
         def should_get_correct_invoice_with_account():
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, {'1':self.mock_json_with_account})
+            self.assertEqual(response.json['result'], {'1':self.mock_json_with_account})
 
         should_get_correct_invoice_with_account()
 
@@ -115,7 +115,7 @@ class InvoiceTests(unittest.TestCase):
         def should_change_record():
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, {'1':put_mock_json})
+            self.assertEqual(response.json['result'], {'1':put_mock_json})
 
         should_receive_success()
         should_change_record()
@@ -134,7 +134,7 @@ class InvoiceTests(unittest.TestCase):
             patch_mock_json['amount'] = '20'
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, {'1':patch_mock_json})
+            self.assertEqual(response.json['result'], {'1':patch_mock_json})
 
         should_receive_success()
         should_change_record()

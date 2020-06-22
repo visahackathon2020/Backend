@@ -6,6 +6,8 @@ import os
 import sys
 from dotenv import load_dotenv
 import random, string
+from helpers import decorate_all_methods
+from functools import wraps
 
 
 load_dotenv() # Load environment variables
@@ -36,7 +38,6 @@ merchant_info_fields = {
 
 invoice_with_account_fields = {
     'merchantid': fields.String,
-    'token': fields.String,
     'amount': fields.String,
     'items': fields.List(fields.Nested(item_fields))
 }
@@ -45,68 +46,70 @@ invoice_no_account_fields = {
     'name': fields.String,
     'country': fields.String,
     'BIN': fields.String,
-    'PAN': fields.String
-    'token': fields.String,
+    'PAN': fields.String,
     'amount': fields.String,
     'items': fields.List(fields.Nested(item_fields))
 }
 
+# This 
+def return_status(func):
+    @wraps(func)
+    def wrapper(*args, **kw):
+        try:
+            res = func(*args, **kw)
+            status = 'success'
+        except:
+            status = 'fail'
+            res = ''
+        finally:
+            id = '' if 'id' not in kw else str(kw['id'])
+            return {'method':func.__name__.upper(), 'status':status, 'id':id, 'result':'' if res is None else res}
+    return wrapper
+
+
 # Merchants RESTful resource Controller
 @api.resource('/merchants', '/merchants/<string:id>')
+@decorate_all_methods(return_status)
 class Merchant(Resource):
     def get(self, id=None):
-        return {"method":"GET","status":"fail","id": id}
+        return None
 
     # Create a merchant info model
     def post(self, id=None):
-        try:
-            merchants[id] = request.json
-        except:
-            return {"method":"POST","status":"fail","id": id}
-        return {"method":"POST","status":"success","id": id}
+        return None
 
     def delete(self, id=None):
-        return {"method":"DELETE","status":"fail","id": id}
+        return None
 
     def put(self, id=None):
-        return {"method":"PUT","status":"fail","id": id}
+        return None
 
     def patch(self, id=None):
-        return {"method":"PATCH","status":"fail","id": id}
+        return None
 
 # Invoice RESTful resource Controller
 @api.resource('/invoices', '/invoices/<string:id>')
+@decorate_all_methods(return_status)
 class Invoice(Resource):
     def get(self, id=None):
-        try: return {id: invoices[id]}
-        except: return {"method":"GET","status":"fail","id": id}
+        return {id: invoices[id]}
 
     def post(self, id=None):
         # Generate unique id
         while True:
-            test_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
-            if test_id not in invoices:
+            id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+            if id not in invoices:
                 break
-        try:
-            invoices[test_id] = request.json
-        except: return {"method":"POST","status":"fail","id": test_id}
-        return {"method":"POST","status":"success","id": test_id}
+        invoices[id] = request.json
 
     def delete(self, id=None):
-        try:
-            del invoices[id]
-        except: return {"method":"DELETE","status":"fail","id": id}
-        return {"method":"DELETE","status":"success","id": id}
+        del invoices[id]
 
     def put(self, id=None):
-        try: invoices[id] = request.json
-        except: return {"method":"PUT","status":"fail","id": id}
-        return {"method":"PUT","status":"success","id": id}
+        invoices[id] = request.json
 
     def patch(self, id=None):
-        try: invoices[id].update(request.json)
-        except: return {"method":"PATCH","status":"fail","id": id, "msg":str(sys.exc_info())}
-        return {"method":"PATCH","status":"success","id": id}
+        invoices[id].update(request.json)
 
 # Testing Flask
 @app.route('/')
