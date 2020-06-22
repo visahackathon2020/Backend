@@ -110,7 +110,9 @@ class Invoice(Resource):
             id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
             if id not in invoices:
                 break
+        # Check that the data is in any valid form
         invoices[id] = request.json
+        return {'invoiceCode':id}
 
     def delete(self, id=None):
         del invoices[id]
@@ -150,7 +152,7 @@ def visa_api_call(url, methodType=requests.get, data=""):
     return r
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     # Checks if we have environment variables set for our TLS keys (this is optional)
     fullchainpath = os.getenv("fullchainpath")
     privatekeypath = os.getenv("privatekeypath")

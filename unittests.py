@@ -171,7 +171,6 @@ if __name__ == '__main__':
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
     '''
-
     suite = unittest.TestLoader().loadTestsFromModule( sys.modules[__name__] )
     unittest.TextTestRunner(verbosity=3).run( suite )
     '''
