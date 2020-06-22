@@ -1,3 +1,5 @@
+''' unittests.py
+'''
 import sys
 import json
 import unittest
@@ -52,12 +54,8 @@ class InvoiceTests(unittest.TestCase):
     def setUp(self):
         self.tester = app.test_client(self)
         self.mock_json_order_info = {
-            "amount": "10",
-            "items": [ {
-                "name": "taco",
-                "price": "10",
-                "quantity": "1"
-            } ]
+            "invoiceAmt": "10",
+            "invoiceDesc": "1 taco for 10 dollars"
         }
         self.mock_json_with_account = dict(
             {"merchantid": "12345678900000000000000000000000"},
@@ -104,7 +102,7 @@ class InvoiceTests(unittest.TestCase):
 
     def test_put(self):
         put_mock_json = dict(**self.mock_json_no_account)
-        put_mock_json['amount'] = '99'
+        put_mock_json['invoiceAmt'] = '99'
 
         def should_receive_success():
             response = self.tester.put('/invoices/1', json=put_mock_json)
@@ -121,7 +119,7 @@ class InvoiceTests(unittest.TestCase):
         should_change_record()
 
     def test_patch(self):
-        json = {'amount':'20'}
+        json = {'invoiceAmt':'20'}
 
         def should_receive_success():
             response = self.tester.patch('/invoices/1', json=json)
@@ -131,7 +129,7 @@ class InvoiceTests(unittest.TestCase):
 
         def should_change_record():
             patch_mock_json = dict(**self.mock_json_with_account)
-            patch_mock_json['amount'] = '20'
+            patch_mock_json['invoiceAmt'] = '20'
             response = self.tester.get('/invoices/1')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['result'], {'1':patch_mock_json})
