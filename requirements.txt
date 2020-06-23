@@ -4,3 +4,4 @@ flask-restful
 flask-cors
 pyopenssl
 coverage
+firebase_admin
