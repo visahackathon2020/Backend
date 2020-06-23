@@ -9,12 +9,18 @@ from helpers import decorate_all_methods, return_status
 import random, string
 import json
 
-# Helper functions TODO
+# Helper functions
+userCodes = {}
 def businessToUserCode(businessCode):
-    return (userCode-1000)//2
+    while True:
+        code = ''.join([str(random.randint(0,9)) for _ in range(6)])
+        if code not in userCodes:
+            break
+    userCodes[code] = businessCode
+    return code
 
 def userToBusinessCode(userCode):
-    return 2*userCode + 1000
+    return userCodes[userCode]
 
 # Invoice RESTful resource Controller
 @decorate_all_methods(return_status)
@@ -36,6 +42,7 @@ class Invoice(Resource):
         code = userToBusinessCode(id)
         doc_ref = database.collection(u'invoices').document(code)
         doc_ref.delete()
+        del userCodes[id]
 
     def put(self, id=None):
         code = userToBusinessCode(id)

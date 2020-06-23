@@ -25,16 +25,17 @@ class InvoiceTests(unittest.TestCase):
         )
 
         # Delete the test data from the firestore
-        response = self.tester.put('/invoices/1', json=self.mock_json_with_account)
+        response = self.tester.post(f'/invoices/', json=self.mock_json_with_account)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['status'], 'success')
+        self.code = response.json['result']['invoiceCode']
 
 
     def test_get(self):
         def should_get_correct_invoice_with_account():
-            response = self.tester.get('/invoices/1')
+            response = self.tester.get(f'/invoices/{self.code}')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json['result'], {'nameOfId': '1',
+            self.assertEqual(response.json['result'], {'nameOfId': f'{self.code}',
                 'invoiceObj':self.mock_json_with_account})
 
         should_get_correct_invoice_with_account()
@@ -68,14 +69,14 @@ class InvoiceTests(unittest.TestCase):
         put_mock_json['invoiceAmt'] = '99'
 
         def should_receive_success():
-            response = self.tester.put('/invoices/1', json=put_mock_json)
+            response = self.tester.put(f'/invoices/{self.code}', json=put_mock_json)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'success')
 
         def should_change_record():
-            response = self.tester.get('/invoices/1')
+            response = self.tester.get(f'/invoices/{self.code}')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json['result'], {'nameOfId': '1',
+            self.assertEqual(response.json['result'], {'nameOfId': f'{self.code}',
                 'invoiceObj':put_mock_json})
 
         should_receive_success()
@@ -85,16 +86,16 @@ class InvoiceTests(unittest.TestCase):
         json = {'invoiceAmt':'20'}
 
         def should_receive_success():
-            response = self.tester.patch('/invoices/1', json=json)
+            response = self.tester.patch(f'/invoices/{self.code}', json=json)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'success')
 
         def should_change_record():
             patch_mock_json = dict(**self.mock_json_with_account)
             patch_mock_json['invoiceAmt'] = '20'
-            response = self.tester.get('/invoices/1')
+            response = self.tester.get(f'/invoices/{self.code}')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json['result'], {'nameOfId': '1',
+            self.assertEqual(response.json['result'], {'nameOfId': f'{self.code}',
                 'invoiceObj':patch_mock_json})
 
         should_receive_success()
@@ -102,12 +103,12 @@ class InvoiceTests(unittest.TestCase):
 
     def test_delete(self):
         def should_receive_success():
-            response = self.tester.delete('/invoices/2')
+            response = self.tester.delete(f'/invoices/{self.code}')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'success')
 
         def should_no_longer_exist():
-            response = self.tester.get('/invoices/2')
+            response = self.tester.get(f'/invoices/{self.code}')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json['status'], 'fail')
 
