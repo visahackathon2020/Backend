@@ -9,11 +9,19 @@ from helpers import decorate_all_methods, return_status
 import random, string
 import json
 
+# Helper functions TODO
+def businessToUserCode(businessCode):
+    return (userCode-1000)//2
+
+def userToBusinessCode(userCode):
+    return 2*userCode + 1000
+
 # Invoice RESTful resource Controller
 @decorate_all_methods(return_status)
 class Invoice(Resource):
     def get(self, id=None):
-        doc_ref = database.collection(u'invoices').document(id)
+        code = userToBusinessCode(id)
+        doc_ref = database.collection(u'invoices').document(code)
         doc = doc_ref.get()
         assert doc.exists, 'failure'
         return {'nameOfId':id,
@@ -22,17 +30,20 @@ class Invoice(Resource):
     def post(self, id=None):
         new_invoice_ref = database.collection(u'invoices').document()
         new_invoice_ref.set(json.loads(request.data))
-        return {'invoiceCode': new_invoice_ref.id}
+        return {'invoiceCode': businessToUserCode(new_invoice_ref.id)}
 
     def delete(self, id=None):
-        doc_ref = database.collection(u'invoices').document(id)
+        code = userToBusinessCode(id)
+        doc_ref = database.collection(u'invoices').document(code)
         doc_ref.delete()
 
     def put(self, id=None):
-        doc_ref = database.collection(u'invoices').document(id)
+        code = userToBusinessCode(id)
+        doc_ref = database.collection(u'invoices').document(code)
         doc_ref.delete()
         doc_ref.set(json.loads(request.data))
 
     def patch(self, id=None):
-        doc_ref = database.collection(u'invoices').document(id)
+        code = userToBusinessCode(id)
+        doc_ref = database.collection(u'invoices').document(code)
         doc_ref.update(json.loads(request.data))
