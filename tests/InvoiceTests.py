@@ -24,6 +24,11 @@ class InvoiceTests(unittest.TestCase):
             **self.mock_json_order_info
         )
 
+        # Delete the test data from the firestore
+        response = self.tester.put('/invoices/1', json=self.mock_json_with_account)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['status'], 'success')
+
 
     def test_get(self):
         def should_get_correct_invoice_with_account():

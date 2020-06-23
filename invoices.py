@@ -15,6 +15,7 @@ class Invoice(Resource):
     def get(self, id=None):
         doc_ref = database.collection(u'invoices').document(id)
         doc = doc_ref.get()
+        assert doc.exists, 'failure'
         return {'nameOfId':id,
                 'invoiceObj':doc.to_dict()}
 
@@ -24,10 +25,14 @@ class Invoice(Resource):
         return {'invoiceCode': new_invoice_ref.id}
 
     def delete(self, id=None):
-        del invoices[id]
+        doc_ref = database.collection(u'invoices').document(id)
+        doc_ref.delete()
 
     def put(self, id=None):
-        invoices[id] = request.json
+        doc_ref = database.collection(u'invoices').document(id)
+        doc_ref.delete()
+        doc_ref.set(json.loads(request.data))
 
     def patch(self, id=None):
-        invoices[id].update(request.json)
+        doc_ref = database.collection(u'invoices').document(id)
+        doc_ref.update(json.loads(request.data))
