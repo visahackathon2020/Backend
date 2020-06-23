@@ -13,11 +13,13 @@ import json
 @decorate_all_methods(return_status)
 class Invoice(Resource):
     def get(self, id=None):
+        doc_ref = database.collection(u'invoices').document(id)
+        doc = doc_ref.get()
         return {'nameOfId':id,
-                'invoiceObj':invoices[id]}
+                'invoiceObj':doc.to_dict()}
 
     def post(self, id=None):
-        new_invoice_ref = database.collection(u"invoices").document()
+        new_invoice_ref = database.collection(u'invoices').document()
         new_invoice_ref.set(json.loads(request.data))
         return {'invoiceCode': new_invoice_ref.id}
 
