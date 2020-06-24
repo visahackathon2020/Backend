@@ -3,8 +3,8 @@ Description of the purpose of this file
 '''
 from flask import jsonify, request
 from flask_restful import Resource
-from db import invoices
 from db import database
+from db import InvoiceSchema
 from helpers import decorate_all_methods, return_status
 import random, string
 import json
@@ -38,7 +38,8 @@ class Invoice(Resource):
 
     def post(self, id=None):
         new_invoice_ref = generateDocRef()
-        new_invoice_ref.set(json.loads(request.data))
+        result = InvoiceSchema().load(json.loads(request.data))
+        new_invoice_ref.set(result)
         code = new_invoice_ref.id
         # Schedule the expiration
         t = threading.Thread(target=scheduleExpirationHandler, args=(self,code,))

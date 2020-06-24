@@ -11,7 +11,6 @@ import sys
 from dotenv import load_dotenv
 import json
 from datetime import datetime
-from db import invoices
 from db import database
 
 

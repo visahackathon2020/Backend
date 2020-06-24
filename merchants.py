@@ -3,7 +3,6 @@ Description of the purpose of this file
 '''
 from flask import jsonify, request
 from flask_restful import Resource
-from db import merchants
 from helpers import decorate_all_methods, return_status
 
 # Merchants RESTful resource Controller
