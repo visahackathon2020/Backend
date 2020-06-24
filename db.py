@@ -29,15 +29,14 @@ merchant_info_fields = {
     'PAN': fields.String
 }
 
-invoice_with_account_fields = {
+# This is supposed to eventually be for filtering the inputs to the POST invoices call
+invoice_input_fields = {
     'name': fields.String,
-    'merchantid': fields.String,
-    'items': fields.List(fields.Nested(merchant_info_fields))
-}
 
-invoice_no_account_fields = {
-    'name': fields.String,
     'country': fields.String,
+    'state': fields.String,
+    'zipcode': fields.String,
+
     'BIN': fields.String,
     'PAN': fields.String,
     'items': fields.List(fields.Nested(merchant_info_fields))

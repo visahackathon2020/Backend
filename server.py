@@ -10,6 +10,9 @@ import os
 import sys
 from dotenv import load_dotenv
 import json
+from datetime import datetime
+from db import invoices
+from db import database
 
 
 load_dotenv() # Load environment variables
@@ -45,15 +48,65 @@ def visa_api_test():
     return visa_api_call('https://sandbox.api.visa.com/vdp/helloworld').content
 
 # Testing visa API calls
-@app.route('/visa-push-test', methods=['POST'])
-def visa_push_test():
+def visa_push_funds(json):
     url = 'https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pushfundstransactions'
-    headers = {"Content-Type":"application/json"}
-    data = request.json
-    x = visa_api_call(url, methodType=requests.post, headers=headers, data=data).content
+    headers = {"Content-Type":"application/json", "Accept":"application/json"}
+    x = visa_api_call(url, methodType=requests.post, headers=headers, json=json).json()
     return x
 
-def visa_api_call(url, methodType=requests.get, headers="",data=""):
+from invoices import userToBusinessCode
+
+@app.route('/makePaymentOnInvoice', methods=['POST'])
+def makePaymentOnInvoice():
+    # json must have "senderPAN" and "invoiceId"
+    sender_json = request.json
+    if 'senderPAN' not in sender_json or 'invoiceId' not in sender_json:
+        return {'status':'fail', 'result':'Missing required field(s) in POST body'}
+
+    # Get the invoices obj from the given code
+    code = userToBusinessCode(sender_json['invoiceId'])
+    doc_ref = database.collection(u'invoices').document(code)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return {'status':'fail', 'result':'Record doesn\'t exist with given invoiceId'}
+    invoice = doc.to_dict()
+
+    # Get the date and audit number
+    now = datetime.now()
+    auditNumber = str(hash(sender_json['invoiceId']) % 1000000).zfill(6)
+    retrievalReferenceNumber = now.strftime("%y")[1] + now.strftime("%j%H") + auditNumber
+    #retrievalReferenceNumber = retrievalReferenceNumber + retrievalReferenceNumber
+
+    # Build the json to send
+    json = {
+        "amount": invoice['amount'],
+        "recipientPrimaryAccountNumber": invoice['pan'],
+        'senderAccountNumber': sender_json['senderPAN'],
+        "localTransactionDateTime": now.strftime('%Y-%m-%dT%H:%M:%S'),
+        "retrievalReferenceNumber": retrievalReferenceNumber,
+        "systemsTraceAuditNumber": auditNumber,
+        "acquirerCountryCode": "840",
+        "acquiringBin": "408999",
+        "businessApplicationId": "AA",
+        "cardAcceptor": {
+        "address": {
+        "country": "USA",
+        "state": "CA",
+        "zipCode": "94404"
+        },
+        "idCode": "CA-IDCode-77765",
+        "name": "Visa Inc. USA-Foster City",
+        "terminalId": "TID-9999"
+        },
+        "transactionCurrencyCode": "USD"
+
+    }
+
+    # TODO delete the invoice if confirmed successful funds transaction
+
+    return visa_push_funds(json)
+
+def visa_api_call(url, methodType=requests.get, headers="", data="", **kw):
     user_id = os.getenv("userid")
     password = os.getenv("password")
 
@@ -65,6 +118,7 @@ def visa_api_call(url, methodType=requests.get, headers="",data=""):
         headers = headers,
         auth = (user_id, password),
         data = data,
+        **kw
         )
 
     return r
