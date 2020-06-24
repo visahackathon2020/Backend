@@ -3,18 +3,18 @@ from random import Random
 
 class TokenGenerator:
     _adjectives = [
-        'aged', 'ancient', 'autumn', 'billowing', 'bitter', 'black', 'blue', 'bold',
+        'aged', 'ancient', 'autumn', 'large', 'bitter', 'black', 'blue', 'bold',
         'broad', 'broken', 'calm', 'cold', 'cool', 'crimson', 'curly', 'damp',
         'dark', 'dawn', 'delicate', 'divine', 'dry', 'empty', 'falling', 'fancy',
-        'flat', 'floral', 'fragrant', 'frosty', 'gentle', 'green', 'hidden', 'holy',
-        'icy', 'jolly', 'late', 'lingering', 'little', 'lively', 'long', 'lucky',
-        'misty', 'morning', 'muddy', 'mute', 'nameless', 'noisy', 'odd', 'old',
+        'flat', 'floral', 'big', 'frosty', 'gentle', 'green', 'hidden', 'holy',
+        'icy', 'jolly', 'late', 'happy', 'little', 'master', 'long', 'lucky',
+        'misty', 'morning', 'muddy', 'mute', 'hot', 'noisy', 'tasty', 'old',
         'orange', 'patient', 'plain', 'polished', 'proud', 'purple', 'quiet', 'rapid',
-        'raspy', 'red', 'restless', 'rough', 'round', 'royal', 'shiny', 'shrill',
-        'shy', 'silent', 'small', 'snowy', 'soft', 'solitary', 'sparkling', 'spring',
+        'raspy', 'red', 'restless', 'rough', 'round', 'royal', 'shiny', 'smart',
+        'shy', 'silent', 'small', 'snowy', 'soft', 'solid', 'sparkling', 'spring',
         'square', 'steep', 'still', 'summer', 'super', 'sweet', 'throbbing', 'tight',
         'tiny', 'twilight', 'wandering', 'weathered', 'white', 'wild', 'winter', 'wispy',
-        'withered', 'yellow', 'young'
+        'sharp', 'yellow', 'young'
     ]
 
     _nouns = [
@@ -25,7 +25,7 @@ class TokenGenerator:
         'frost', 'glade', 'glitter', 'grass', 'hall', 'hat', 'haze', 'heart',
         'hill', 'king', 'lab', 'lake', 'leaf', 'limit', 'math', 'meadow',
         'mode', 'moon', 'morning', 'mountain', 'mouse', 'mud', 'night', 'paper',
-        'pine', 'poetry', 'pond', 'queen', 'rain', 'recipe', 'resonance', 'rice',
+        'pine', 'poetry', 'pond', 'queen', 'rain', 'recipe', 'dog', 'rice',
         'river', 'salad', 'scene', 'sea', 'shadow', 'shape', 'silence', 'sky',
         'smoke', 'snow', 'snowflake', 'sound', 'star', 'sun', 'sun', 'sunset',
         'surf', 'term', 'thunder', 'tooth', 'tree', 'truth', 'union', 'unit',
