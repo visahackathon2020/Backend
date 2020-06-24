@@ -76,8 +76,8 @@ def makePaymentOnInvoice():
 
     # Build the json to send
     json = {
-        "amount": invoice['amount'],
-        "recipientPrimaryAccountNumber": invoice['pan'],
+        "amount": str(sum([float(item['amount']) for item in invoice['items']])),
+        "recipientPrimaryAccountNumber": invoice['PAN'],
         'senderAccountNumber': sender_json['senderPAN'],
         "localTransactionDateTime": now.strftime('%Y-%m-%dT%H:%M:%S'),
         "retrievalReferenceNumber": retrievalReferenceNumber,
