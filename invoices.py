@@ -25,7 +25,6 @@ def userToBusinessCode(userCode):
 
 scheduler = sched.scheduler(time.time, time.sleep)
 def scheduleExpirationHandler(apiRef, userCode, timeUntilExpiration=60*60):
-    print(timeUntilExpiration)
     scheduler.enter(timeUntilExpiration, 1, apiRef.delete, kwargs={'id':userCode})
     scheduler.run()
 
@@ -50,7 +49,6 @@ class Invoice(Resource):
         return {'invoiceCode': code}
 
     def delete(self, id=None):
-        print("Invoice Delete Called")
         code = userToBusinessCode(id)
         doc_ref = database.collection(u'invoices').document(code)
         doc_ref.delete()
