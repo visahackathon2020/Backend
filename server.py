@@ -54,8 +54,6 @@ def visa_push_funds(json):
     x = visa_api_call(url, methodType=requests.post, headers=headers, json=json).json()
     return x
 
-from invoices import userToBusinessCode
-
 @app.route('/makePaymentOnInvoice', methods=['POST'])
 def makePaymentOnInvoice():
     # json must have "senderPAN" and "invoiceId"
@@ -64,7 +62,7 @@ def makePaymentOnInvoice():
         return {'status':'fail', 'result':'Missing required field(s) in POST body'}
 
     # Get the invoices obj from the given code
-    code = userToBusinessCode(sender_json['invoiceId'])
+    code = sender_json['invoiceId']
     doc_ref = database.collection(u'invoices').document(code)
     doc = doc_ref.get()
     if not doc.exists:
