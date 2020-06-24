@@ -1,6 +1,7 @@
 ''' db.py
 '''
 import firebase_admin
+import re
 from firebase_admin import credentials
 from firebase_admin import firestore
 
@@ -42,3 +43,13 @@ class InvoiceSchema(Schema):
     zipcode = fields.Str(required=True, error_messages={"required": "zipcode is required."})
     PAN = fields.Str(required=True, error_messages={"required": "PAN is required."})
     items = fields.List(fields.Nested(ItemSchema), required=True)
+
+class PaymentSchema(Schema):
+    senderPAN = fields.Str(required=True)
+    invoiceId = fields.Str(required=True)
+
+    @validates('senderPAN')
+    def validate_sender_pan(self, value):
+        pattern = re.compile(r'\d{16}')
+        if not pattern.match(value):
+            raise ValidationError('Invalid PAN number')
