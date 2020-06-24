@@ -3,7 +3,7 @@
 import sys
 import json
 import unittest
-from controller import app
+from server import app
 
 class MerchantTests(unittest.TestCase):
     def setUp(self):

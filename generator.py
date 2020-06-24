@@ -1,3 +1,4 @@
+import time
 from random import Random
 
 class TokenGenerator:
@@ -32,7 +33,7 @@ class TokenGenerator:
     ]
 
     def __init__(self):
-        seed = "pandemic"
+        seed = "pandemic" + str(time.time())
         self.random = Random(seed)
 
     def generate(self):

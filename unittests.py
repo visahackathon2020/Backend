@@ -3,10 +3,11 @@
 import sys
 import json
 import unittest
-from controller import app
+from server import app
 
 from tests import MerchantTests as M
 from tests import InvoiceTests as I
+from tests import VisaFundsPushTests as V
 
 class ServerTests(unittest.TestCase):
     def setUp(self):
@@ -29,7 +30,7 @@ class ServerTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    test_classes_to_run = [ServerTests, I.InvoiceTests, M.MerchantTests]
+    test_classes_to_run = [ServerTests, I.InvoiceTests, M.MerchantTests, V.VisaFundsPushTests]
     loader = unittest.TestLoader()
 
     suites_list = []

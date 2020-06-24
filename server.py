@@ -1,14 +1,15 @@
 #!flask/bin/python
-''' controller.py
+''' server.py
 Description of the purpose of this file
 '''
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Api
 from flask_cors import CORS, cross_origin
 import requests
 import os
 import sys
 from dotenv import load_dotenv
+import json
 
 
 load_dotenv() # Load environment variables
@@ -43,11 +44,18 @@ def index():
 def visa_api_test():
     return visa_api_call('https://sandbox.api.visa.com/vdp/helloworld').content
 
-def visa_api_call(url, methodType=requests.get, data=""):
+# Testing visa API calls
+@app.route('/visa-push-test', methods=['POST'])
+def visa_push_test():
+    url = 'https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pushfundstransactions'
+    headers = {"Content-Type":"application/json"}
+    data = request.json
+    x = visa_api_call(url, methodType=requests.post, headers=headers, data=data).content
+    return x
+
+def visa_api_call(url, methodType=requests.get, headers="",data=""):
     user_id = os.getenv("userid")
     password = os.getenv("password")
-    headers = ""
-    data = data
 
     #verify = (certs_dir_path + '/DigiCertGlobalRootCA.crt'),
     r = methodType(url,

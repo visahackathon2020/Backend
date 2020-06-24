@@ -9,12 +9,14 @@ from helpers import decorate_all_methods, return_status
 import random, string
 import json
 import threading, sched, time
+from generator import TokenGenerator
 
 # Helper functions
+codeGenerator = TokenGenerator()
 userCodes = {}
 def businessToUserCode(businessCode):
     while True:
-        code = ''.join([str(random.randint(0,9)) for _ in range(6)])
+        code = codeGenerator.generate()
         if code not in userCodes:
             break
     userCodes[code] = businessCode
