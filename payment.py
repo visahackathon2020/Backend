@@ -8,6 +8,7 @@ from db import database
 from datetime import datetime
 import requests
 import json
+import os
 
 # Testing visa API calls
 def visa_push_funds(json):
@@ -48,7 +49,7 @@ class Payment(Resource):
             "retrievalReferenceNumber": retrievalReferenceNumber,
             "systemsTraceAuditNumber": auditNumber,
             "acquirerCountryCode": "840",
-            "acquiringBin": "408999",
+            "acquiringBin": os.getenv("acquiringBin"),
             "businessApplicationId": "AA",
             "cardAcceptor": {
             "address": {
