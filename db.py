@@ -46,6 +46,12 @@ class InvoiceSchema(Schema):
     PAN = fields.Str(required=True, error_messages={"required": "PAN is required."})
     items = fields.List(fields.Nested(ItemSchema), required=True)
 
+    @validates('PAN')
+    def validate_pan(self, value):
+        pattern = re.compile(r'\d{16}')
+        if not pattern.match(value):
+            raise ValidationError('Invalid PAN number')
+
 class PaymentSchema(Schema):
     senderPAN = fields.Str(required=True)
     invoiceId = fields.Str(required=True)
