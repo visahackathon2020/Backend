@@ -36,8 +36,14 @@ class ItemSchema(Schema):
 # }
 
 # This is supposed to eventually be for filtering the inputs to the POST invoices call
+class InvoiceSignedinSchema(Schema):
+    businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
+    additionalMessage = fields.Str()
+    merchantId = fields.Str(required=True, error_messages={"required": "merchantId is required."})
+    items = fields.List(fields.Nested(ItemSchema), required=True)
+
 class InvoiceSchema(Schema):
-    businessName = fields.Str(required=True, error_messages={"required": "business name is required."})
+    businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
     additionalMessage = fields.Str()
     name = fields.Str(required=True, error_messages={"required": "name is required."})
     country = fields.Str(required=True, error_messages={"required": "country is required."})

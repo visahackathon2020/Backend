@@ -48,7 +48,10 @@ class Invoice(Resource):
 
     def post(self, id=None):
         new_invoice_ref = generateDocRef()
-        result = InvoiceSchema().load(json.loads(request.data))
+        try:
+            result = InvoiceSchema().load(json.loads(request.data))
+        except ValidationError:
+            result = InvoiceSignedinSchema().load(json.loads(request.data))
         new_invoice_ref.set(result)
         code = new_invoice_ref.id
         # Schedule the expiration

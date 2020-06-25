@@ -14,7 +14,13 @@ import os
 def visa_push_funds(json):
     url = 'https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pushfundstransactions'
     headers = {"Content-Type":"application/json", "Accept":"application/json"}
-    x = visa_api_call(url, methodType=requests.post, headers=headers, json=json).json()
+    x = visa_api_call(url, methodType=requests.post, headers=headers, json=json)
+    return x
+
+def visa_pull_funds(json):
+    url = 'https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pullfundstransactions'
+    headers = {"Content-Type":"application/json", "Accept":"application/json"}
+    x = visa_api_call(url, methodType=requests.post, headers=headers, json=json)
     return x
 
 @decorate_all_methods(return_status)
@@ -38,13 +44,10 @@ class Payment(Resource):
         now = datetime.now()
         auditNumber = str(hash(sender_json['invoiceId']) % 1000000).zfill(6)
         retrievalReferenceNumber = now.strftime("%y")[1] + now.strftime("%j%H") + auditNumber
-        #retrievalReferenceNumber = retrievalReferenceNumber + retrievalReferenceNumber
-
-        # Build the json to send
+        # Build the push json to send
         api_json = {
             "amount": str(sum([float(item['amount']) for item in invoice['items']])),
             "recipientPrimaryAccountNumber": invoice['PAN'],
-            'senderAccountNumber': sender_json['senderPAN'],
             "localTransactionDateTime": now.strftime('%Y-%m-%dT%H:%M:%S'),
             "retrievalReferenceNumber": retrievalReferenceNumber,
             "systemsTraceAuditNumber": auditNumber,
@@ -52,20 +55,40 @@ class Payment(Resource):
             "acquiringBin": os.getenv("acquiringBin"),
             "businessApplicationId": "AA",
             "cardAcceptor": {
-            "address": {
-            "country": "USA",
-            "state": "CA",
-            "zipCode": "94404"
-            },
-            "idCode": "CA-IDCode-77765",
-            "name": "Visa Inc. USA-Foster City",
-            "terminalId": "TID-9999"
-            },
-            "transactionCurrencyCode": "USD"
+                "address": {
+                "country": "USA",
+                "state": "CA",
+                "zipCode": "94404"
+                },
+                "idCode": "CA-IDCode-77765",
+                "name": "Visa Inc. USA-Foster City",
+                "terminalId": "TID-9999"
+            }
 
         }
 
-        # TODO delete the invoice if confirmed successful funds transaction
+        pull_api_json = dict({
+            'senderPrimaryAccountNumber': sender_json['senderPAN'],
+            "acquirerCountryCode": "840",
+            "senderCurrencyCode":"USD",
+            "senderCardExpiryDate": "2015-10",
+            "cpsAuthorizationCharacteristicsIndicator": "Y"
+        }, **api_json)
 
-        return visa_push_funds(api_json)
+
+        push_api_json = dict({
+            'senderAccountNumber': sender_json['senderPAN'],
+            "transactionCurrencyCode": "USD"
+        }, **api_json)
+        print(str(push_api_json))
+
+
+        # Build the pull json to send
+        pull_res = visa_pull_funds(pull_api_json)
+        assert pull_res.status_code == 200, "Pull:" + str(pull_res.content)
+
+        push_res = visa_push_funds(push_api_json)
+        assert push_res.status_code == 200, "Push:" + str(push_res.content)
+       
+        return push_res.content
 
