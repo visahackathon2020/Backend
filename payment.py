@@ -7,6 +7,7 @@ from db import PaymentSchema
 from db import database
 from datetime import datetime
 import requests
+import json
 
 # Testing visa API calls
 def visa_push_funds(json):
@@ -19,6 +20,9 @@ def visa_push_funds(json):
 class Payment(Resource):
     def post(self):
         # verify JSON with schema
+        load_json = request.json
+        if load_json is None:
+            load_json = json.loads(request.data)
         sender_json = PaymentSchema().load(request.json)
 
         # Get the invoices obj from the given code
@@ -36,7 +40,7 @@ class Payment(Resource):
         #retrievalReferenceNumber = retrievalReferenceNumber + retrievalReferenceNumber
 
         # Build the json to send
-        json = {
+        api_json = {
             "amount": str(sum([float(item['amount']) for item in invoice['items']])),
             "recipientPrimaryAccountNumber": invoice['PAN'],
             'senderAccountNumber': sender_json['senderPAN'],
@@ -62,5 +66,5 @@ class Payment(Resource):
 
         # TODO delete the invoice if confirmed successful funds transaction
 
-        return visa_push_funds(json)
+        return visa_push_funds(api_json)
 
