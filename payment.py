@@ -80,7 +80,6 @@ class Payment(Resource):
             'senderAccountNumber': sender_json['senderPAN'],
             "transactionCurrencyCode": "USD"
         }, **api_json)
-        print(str(push_api_json))
 
 
         # Build the pull json to send
@@ -90,5 +89,5 @@ class Payment(Resource):
         push_res = visa_push_funds(push_api_json)
         assert push_res.status_code == 200, "Push:" + str(push_res.content)
        
-        return push_res.content
+        return push_res.json()
 
