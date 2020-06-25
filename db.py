@@ -37,6 +37,8 @@ class ItemSchema(Schema):
 
 # This is supposed to eventually be for filtering the inputs to the POST invoices call
 class InvoiceSchema(Schema):
+    businessName = fields.Str(required=True, error_messages={"required": "business name is required."})
+    additionalMessage = fields.Str()
     name = fields.Str(required=True, error_messages={"required": "name is required."})
     country = fields.Str(required=True, error_messages={"required": "country is required."})
     state = fields.Str(required=True, error_messages={"required": "state is required."})

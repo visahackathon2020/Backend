@@ -33,8 +33,18 @@ class Invoice(Resource):
         doc_ref = database.collection(u'invoices').document(id)
         doc = doc_ref.get()
         assert doc.exists, 'failure'
+        doc_dict = doc.to_dict()
+        if 'additionalMessage' in doc_dict:
+            additionalMessage = doc_dict['additionalMessage']
+        else:
+            additionalMessage = ""
+        ret_obj = {
+            'businessName': doc_dict['businessName'],
+            'additionalMessage': additionalMessage,
+            'items': doc_dict['items']
+        }
         return {'nameOfId':id,
-                'invoiceObj':doc.to_dict()}
+                'invoiceObj':ret_obj}
 
     def post(self, id=None):
         new_invoice_ref = generateDocRef()
