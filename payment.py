@@ -23,7 +23,7 @@ class Payment(Resource):
         load_json = request.json
         if load_json is None:
             load_json = json.loads(request.data)
-        sender_json = PaymentSchema().load(request.json)
+        sender_json = PaymentSchema().load(load_json)
 
         # Get the invoices obj from the given code
         code = sender_json['invoiceId']
