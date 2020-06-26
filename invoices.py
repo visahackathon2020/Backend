@@ -52,6 +52,9 @@ class Invoice(Resource):
             result = InvoiceSchema().load(json.loads(request.data))
         except ValidationError:
             result = InvoiceSignedinSchema().load(json.loads(request.data))
+            decoded_token = auth.verify_id_token(result['merchantToken'])
+            del result['merchantToken']
+            result['merchantId'] = decoded_token['uid']
         new_invoice_ref.set(result)
         code = new_invoice_ref.id
         # Schedule the expiration
