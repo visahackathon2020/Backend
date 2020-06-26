@@ -30,18 +30,23 @@ class Merchant(Resource):
 
     # Create a merchant doc
     def post(self, **kw):
+        result = MerchantsSchema().load(json.loads(request.data))
         doc_ref = database.collection(u'merchants').document(uid)
-        doc_ref.set(json.loads(request.data))
+        doc_ref.set(result)
 
     def delete(self, **kw):
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
 
+    # This is commented out because the data isn't being validated by schema
+    '''
     def put(self, **kw):
+        result = MerchantsSchema().load(json.loads(request.data))
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
-        doc_ref.set(json.loads(request.data))
+        doc_ref.set(result)
 
     def patch(self, **kw):
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.update(json.loads(request.data))
+    '''

@@ -36,6 +36,13 @@ class ItemSchema(Schema):
 # }
 
 # This is supposed to eventually be for filtering the inputs to the POST invoices call
+class MerchantsSchema(Schema):
+    name = fields.Str(required=True, error_messages={"required": "name is required."})
+    country = fields.Str(required=True, error_messages={"required": "country is required."})
+    state = fields.Str(required=True, error_messages={"required": "state is required."})
+    zipcode = fields.Str(required=True, error_messages={"required": "zipcode is required."})
+    PAN = fields.Str(required=True, error_messages={"required": "PAN is required."})
+
 class InvoiceSignedinSchema(Schema):
     businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
     additionalMessage = fields.Str()

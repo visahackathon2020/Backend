@@ -66,6 +66,8 @@ class Invoice(Resource):
         doc_ref = database.collection(u'invoices').document(id)
         doc_ref.delete()
 
+    # This is commented out because the data isn't being validated by schema
+    '''
     def put(self, id=None):
         doc_ref = database.collection(u'invoices').document(id)
         doc_ref.delete()
@@ -74,3 +76,4 @@ class Invoice(Resource):
     def patch(self, id=None):
         doc_ref = database.collection(u'invoices').document(id)
         doc_ref.update(json.loads(request.data))
+    '''
