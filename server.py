@@ -34,7 +34,7 @@ from invoices import Invoice
 from merchants import Merchant
 from payment import Payment
 api.add_resource(Invoice,'/invoices','/invoices/', '/invoices/<string:id>')
-api.add_resource(Merchant,'/merchants', '/merchants/<string:id>')
+api.add_resource(Merchant,'/merchants', '/merchants/<string:cmd>')
 api.add_resource(Payment, '/payment')
 api.init_app(app)
 
