@@ -22,7 +22,7 @@ class Merchant(Resource):
             uid = decoded_token['uid']
             doc_ref = database.collection(u'merchants').document(uid)
             doc = doc_ref.get()
-            return {'docExists':str(assert doc.exists)}
+            return {'docExists':str(doc.exists)}
         
         assert False, 'Invalid endpoint'
 
