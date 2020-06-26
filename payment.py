@@ -40,6 +40,15 @@ class Payment(Resource):
             return {'status':'fail', 'result':'Record doesn\'t exist with given invoiceId'}
         invoice = doc.to_dict()
 
+        # Check if the invoice has merchantId
+        if 'merchantId' in invoice:
+            merchant_doc_ref = database.collection(u'merchants').document(invoice['merchantId'])
+            merchant_doc = merchant_doc_ref.get()
+            if not merchant_doc.exists:
+                return {'status':'fail', 'result':'Invalid merchantId'}
+            del invoice['merchantId']
+            invoice = dict(invoice, **merchant_doc.to_dict())
+
         # Get the date and audit number
         now = datetime.now()
         auditNumber = str(hash(sender_json['invoiceId']) % 1000000).zfill(6)

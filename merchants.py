@@ -7,30 +7,41 @@ from helpers import decorate_all_methods, return_status
 import json
 from db import database
 from firebase_admin import auth
+from functools import wraps
+
+def check_headers(func):
+    @wraps(func)
+    def wrapper(*args, **kw):
+        assert 'Authorization' in request.headers, 'Missing Authorization header'
+        decoded_token = auth.verify_id_token(request.headers['Authorization'])
+        kw['uid'] = decoded_token['uid']
+        return func(*args, **kw)
+    return wrapper
 
 # Merchants RESTful resource Controller
 @decorate_all_methods(return_status)
+@decorate_all_methods(check_headers)
 class Merchant(Resource):
-    def get(self, id=None):
-        return None
+    # Check if merchant doc exist
+    def get(self, **kw):
+        doc_ref = database.collection(u'merchants').document(uid)
+        doc = doc_ref.get()
+        return {'docExists':str(doc.exists)}
 
-    # Create a merchant info model
-    def post(self, cmd=None):
-        if cmd == "docExists":
-            body = json.loads(request.data)
-            decoded_token = auth.verify_id_token(body['authToken'])
-            uid = decoded_token['uid']
-            doc_ref = database.collection(u'merchants').document(uid)
-            doc = doc_ref.get()
-            return {'docExists':str(doc.exists)}
-        
-        assert False, 'Invalid endpoint'
+    # Create a merchant doc
+    def post(self, **kw):
+        doc_ref = database.collection(u'merchants').document(uid)
+        doc_ref.set(json.loads(request.data))
 
-    def delete(self, id=None):
-        return None
+    def delete(self, **kw):
+        doc_ref = database.collection(u'merchants').document(uid)
+        doc_ref.delete()
 
-    def put(self, id=None):
-        return None
+    def put(self, **kw):
+        doc_ref = database.collection(u'merchants').document(uid)
+        doc_ref.delete()
+        doc_ref.set(json.loads(request.data))
 
-    def patch(self, id=None):
-        return None
+    def patch(self, **kw):
+        doc_ref = database.collection(u'merchants').document(uid)
+        doc_ref.update(json.loads(request.data))
