@@ -43,6 +43,12 @@ class MerchantsSchema(Schema):
     zipcode = fields.Str(required=True, error_messages={"required": "zipcode is required."})
     PAN = fields.Str(required=True, error_messages={"required": "PAN is required."})
 
+    @validates('PAN')
+    def validate_pan(self, value):
+        pattern = re.compile(r'\d{16}')
+        if not pattern.match(value):
+            raise ValidationError('Invalid PAN number')
+
 class InvoiceSignedinSchema(Schema):
     businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
     additionalMessage = fields.Str()
