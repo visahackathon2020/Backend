@@ -38,15 +38,14 @@ class Merchant(Resource):
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
 
-    # This is commented out because the data isn't being validated by schema
-    '''
     def put(self, **kw):
-        result = MerchantsSchema().load(json.loads(request.data))
+        result = MerchantsSchema().load()
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
         doc_ref.set(result)
 
     def patch(self, **kw):
+        in_json = json.loads(request.data)
+        assert in_json <= list(MerchantsSchema().__dict__.keys()), 'Invalid keys'
         doc_ref = database.collection(u'merchants').document(uid)
-        doc_ref.update(json.loads(request.data))
-    '''
+        doc_ref.update(in_json)
