@@ -9,6 +9,9 @@ from datetime import datetime
 import requests
 import json
 import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from firebase_admin import auth
 
 # Testing visa API calls
 def visa_push_funds(json):
@@ -22,6 +25,24 @@ def visa_pull_funds(json):
     headers = {"Content-Type":"application/json", "Accept":"application/json"}
     x = visa_api_call(url, methodType=requests.post, headers=headers, json=json)
     return x
+
+def send_confirmation(email, subject, content):
+    # Send confirmation Email
+    message = Mail(
+        from_email='pandemic.coders@gmail.com',
+        to_emails=email
+    )
+    message.dynamic_template_data = {
+        'subject': subject,
+        'content': content
+    }
+    message.template_id = 'd-2a96789c5f1c4ee5a612d632f7704937'
+    try:
+        sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+        response = sg.send(message)
+    except Exception as e:
+        print(e)
+        print(e.body)
 
 @decorate_all_methods(return_status)
 class Payment(Resource):
@@ -48,6 +69,7 @@ class Payment(Resource):
                 return {'status':'fail', 'result':'Invalid merchantId'}
             del invoice['merchantId']
             invoice = dict(invoice, **merchant_doc.to_dict())
+            invoice['email'] = auth.get_user(invoice['merchantId']).email
 
         # Get the date and audit number
         now = datetime.now()
@@ -97,6 +119,10 @@ class Payment(Resource):
 
         push_res = visa_push_funds(push_api_json)
         assert push_res.status_code == 200, "Push:" + str(push_res.content)
+
+        send_confirmation(invoice['email'], f'Payment Confirmation: {code}', f'Payment successfully received for invoice: {code}')
+        if 'email' in sender_json:
+            send_confirmation(sender_json['email'], f'Payment Confirmation: {code}', f'Payment successfully sent for invoice: {code}')
        
         return push_res.json()
 

@@ -6,3 +6,4 @@ pyopenssl
 coverage
 firebase_admin
 marshmallow
+sendgrid

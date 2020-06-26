@@ -58,6 +58,7 @@ class InvoiceSignedinSchema(Schema):
 class InvoiceSchema(Schema):
     businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
     additionalMessage = fields.Str()
+    email = fields.Str(required=True, error_messages={"required": "email is required"})
     name = fields.Str(required=True, error_messages={"required": "name is required."})
     country = fields.Str(required=True, error_messages={"required": "country is required."})
     state = fields.Str(required=True, error_messages={"required": "state is required."})
@@ -71,9 +72,16 @@ class InvoiceSchema(Schema):
         if not pattern.match(value):
             raise ValidationError('Invalid PAN number')
 
+    @validates('email')
+    def validate_email(self, value):
+        pattern = re.compile(r'^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$')
+        if not pattern.match(value):
+            raise ValidationError('Invalid Email Address')
+
 class PaymentSchema(Schema):
     senderPAN = fields.Str(required=True)
     invoiceId = fields.Str(required=True)
+    email = fields.Str()
 
     @validates('senderPAN')
     def validate_sender_pan(self, value):
