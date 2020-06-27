@@ -5,6 +5,7 @@ from flask import jsonify, request
 from flask_restful import Resource
 from db import database
 from db import InvoiceSchema
+from db import InvoiceSignedinSchema
 from helpers import decorate_all_methods, return_status
 import random, string
 import json
