@@ -3,6 +3,8 @@ Description of the purpose of this file
 '''
 from functools import wraps
 import sys
+import logging
+logging = logging.Logger('catch_all')
 
 # This decorates all the methods of a class
 def decorate_all_methods(function_decorator):
@@ -20,9 +22,14 @@ def return_status(func):
         try:
             res = func(*args, **kw)
             status = 'success'
-        except:
+        except ValidationError as e:
             status = 'fail'
-            res = str(sys.exc_info())
+            logger.error(e, exc_info=True)
+            res = 'Invalid input: ' + str(e)
+        except Exception as e:
+            status = 'fail'
+            logger.error(e, exc_info=True)
+            res = str(e)
         finally:
             id = '' if 'id' not in kw else str(kw['id'])
             return {'method':func.__name__.upper(), 'status':status, 'id':id, 'result':'' if res is None else res}

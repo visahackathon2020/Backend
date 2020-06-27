@@ -53,6 +53,7 @@ class Invoice(Resource):
         try:
             result = InvoiceSchema().load(json.loads(request.data))
         except ValidationError:
+            return {"this is for kyle":""}
             result = InvoiceSignedinSchema().load(json.loads(request.data))
             decoded_token = auth.verify_id_token(result['merchantToken'])
             del result['merchantToken']
