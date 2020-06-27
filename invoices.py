@@ -12,6 +12,7 @@ import json
 import threading, sched, time
 from generator import TokenGenerator
 from marshmallow import ValidationError
+from firebase_admin import auth
 
 # Helper functions
 codeGenerator = TokenGenerator()

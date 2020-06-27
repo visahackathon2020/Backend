@@ -52,6 +52,7 @@ class MerchantsSchema(Schema):
 class InvoiceSignedinSchema(Schema):
     businessName = fields.Str(required=True, error_messages={"required": "businessName is required."})
     additionalMessage = fields.Str()
+    email = fields.Str(required=True, error_messages={"required": "email is required"})
     merchantToken = fields.Str(required=True, error_messages={"required": "merchantToken is required."})
     items = fields.List(fields.Nested(ItemSchema), required=True)
 
