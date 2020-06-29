@@ -33,20 +33,20 @@ class Merchant(Resource):
     def post(self, uid=None):
         result = MerchantsSchema().load(json.loads(request.data))
         doc_ref = database.collection(u'merchants').document(uid)
-        doc_ref.set(result)
+        doc_ref.set({'paymentInfo':result, 'totalTips':'0'})
 
     def delete(self, uid=None):
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
 
     def put(self, uid=None):
-        result = MerchantsSchema().load()
+        result = MerchantsSchema().load(json.loads(request.data))
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.delete()
-        doc_ref.set(result)
+        doc_ref.set({'paymentInfo':result, 'totalTips':'0'})
 
     def patch(self, uid=None):
         in_json = json.loads(request.data)
         assert in_json <= list(MerchantsSchema().__dict__.keys()), 'Invalid keys'
         doc_ref = database.collection(u'merchants').document(uid)
-        doc_ref.update(in_json)
+        doc_ref.update({'paymentInfo':in_json})

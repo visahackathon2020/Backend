@@ -4,6 +4,8 @@ Description of the purpose of this file
 from functools import wraps
 import sys
 import logging
+import traceback
+import json
 from marshmallow import ValidationError
 logger = logging.Logger('catch_all')
 
@@ -21,19 +23,25 @@ def return_status(func):
     @wraps(func)
     def wrapper(*args, **kw):
         status = 'fail'
+        res = None
         try:
             res = func(*args, **kw)
             status = 'success'
         except ValidationError as e:
             status = 'fail'
             logger.error(e, exc_info=True)
-            res = 'Invalid input: ' + str(e)
-        except Exception as e:
-            status = 'fail'
-            logger.error(e, exc_info=True)
-            res = str(e)
+            print(e.messages)
+            res = {'errorType': str(e.__class__.__name__),
+                   'errorMessage': e.messages,
+                   'traceback' : str(traceback.format_stack())}
         except:
-            res = str(sys.exc_info())
+            print("here")
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+            trace_back = traceback.extract_tb(ex_traceback)
+            trace_back_res = ["File : %s , Line : %d, Func.Name : %s, Message : %s" % (i[0], i[1], i[2], i[3]) for i in trace_back]
+            res = {'errorType': str(ex_type.__name__),
+                   'errorMessage': str(ex_value),
+                   'traceback' : trace_back_res}
         finally:
             id = '' if 'id' not in kw else str(kw['id'])
             return {'method':func.__name__.upper(), 'status':status, 'id':id, 'result':'' if res is None else res}

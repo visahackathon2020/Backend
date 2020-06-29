@@ -57,19 +57,22 @@ class Payment(Resource):
         code = sender_json['invoiceId']
         doc_ref = database.collection(u'invoices').document(code)
         doc = doc_ref.get()
-        if not doc.exists:
-            return {'status':'fail', 'result':'Record doesn\'t exist with given invoiceId'}
+        assert doc.exists, 'Record doesn\'t exist with given invoiceId'
         invoice = doc.to_dict()
 
         # Check if the invoice has merchantId
+        merchant_doc = None
+        merchant_doc_ref = None
         if 'merchantId' in invoice:
             merchant_doc_ref = database.collection(u'merchants').document(invoice['merchantId'])
             merchant_doc = merchant_doc_ref.get()
-            if not merchant_doc.exists:
-                return {'status':'fail', 'result':'Invalid merchantId'}
+            assert merchant_doc.exists, 'Invalid merchantId'
             del invoice['merchantId']
-            invoice = dict(invoice, **merchant_doc.to_dict())
+            invoice = dict(invoice, **merchant_doc.to_dict()['paymentInfo'])
             invoice['email'] = auth.get_user(invoice['merchantId']).email
+
+        # Get the tip
+        tip = 0 if 'tip' not in sender_json else sender_json['tip']
 
         # Get the date and audit number
         now = datetime.now()
@@ -77,7 +80,7 @@ class Payment(Resource):
         retrievalReferenceNumber = now.strftime("%y")[1] + now.strftime("%j%H") + auditNumber
         # Build the push json to send
         api_json = {
-            "amount": str(sum([float(item['amount']) for item in invoice['items']])),
+            "amount": str(tip + sum([float(item['amount']) for item in invoice['items']])),
             "recipientPrimaryAccountNumber": invoice['PAN'],
             "localTransactionDateTime": now.strftime('%Y-%m-%dT%H:%M:%S'),
             "retrievalReferenceNumber": retrievalReferenceNumber,
@@ -124,5 +127,11 @@ class Payment(Resource):
         if 'email' in sender_json:
             send_confirmation(sender_json['email'], f'Payment Confirmation: {code}', f'Payment successfully sent for invoice: {code}')
        
+        # Add the tip to the total if they're signed in
+        if merchant_doc_ref is not None and 'tip' in sender_json:
+            currTotal = merchant_doc.to_dict()['tipsTotal']
+            # issue: This could result in concurrent inconsistency
+            merchant_doc_ref.update({'tipsTotal': currTotal + tip})
+
         return push_res.json()
 

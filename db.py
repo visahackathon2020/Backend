@@ -81,6 +81,7 @@ class InvoiceSchema(Schema):
 
 class PaymentSchema(Schema):
     senderPAN = fields.Str(required=True)
+    tip = fields.Float()
     invoiceId = fields.Str(required=True)
     email = fields.Str()
 
