@@ -47,6 +47,7 @@ class Invoice(Resource):
         doc_ref = database.collection(u'invoices').document(id)
         doc = doc_ref.get()
         assert doc.exists, 'failure'
+        assert time.time() - doc.to_dict()['created'] <= 86400, 'expired'
         doc_dict = doc.to_dict()
         if 'additionalMessage' in doc_dict:
             additionalMessage = doc_dict['additionalMessage']
