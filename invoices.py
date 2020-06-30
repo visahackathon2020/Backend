@@ -62,9 +62,10 @@ class Invoice(Resource):
                 'invoiceObj':ret_obj}
 
     def post(self, id=None):
+        print("invoice request: ",request.data)
         new_invoice_ref = generateDocRef()
         in_json = json.loads(request.data)
-        if 'merchantToken' in in_json:
+        if 'merchantToken' not in in_json:
             result = InvoiceSchema().load(in_json)
         else:
             result = InvoiceSignedinSchema().load(in_json)

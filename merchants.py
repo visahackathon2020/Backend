@@ -31,6 +31,7 @@ class Merchant(Resource):
 
     # Create a merchant doc
     def post(self, uid=None):
+        print("merchants request: ",request.data)
         result = MerchantsSchema().load(json.loads(request.data))
         doc_ref = database.collection(u'merchants').document(uid)
         doc_ref.set({'paymentInfo':result, 'totalTips':'0'})

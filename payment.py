@@ -67,9 +67,9 @@ class Payment(Resource):
             merchant_doc_ref = database.collection(u'merchants').document(invoice['merchantId'])
             merchant_doc = merchant_doc_ref.get()
             assert merchant_doc.exists, 'Invalid merchantId'
+            invoice['email'] = auth.get_user(invoice['merchantId']).email
             del invoice['merchantId']
             invoice = dict(invoice, **merchant_doc.to_dict()['paymentInfo'])
-            invoice['email'] = auth.get_user(invoice['merchantId']).email
 
         # Get the tip
         tip = 0 if 'tip' not in sender_json else sender_json['tip']
@@ -118,10 +118,19 @@ class Payment(Resource):
 
         # Build the pull json to send
         pull_res = visa_pull_funds(pull_api_json)
-        assert pull_res.status_code == 200, "Pull:" + str(pull_res.content)
+        pull_res_json = json.loads(pull_res.content)
+        pull_res_err = str(pull_res_json)
+        if 'errorMessage' in pull_res_json:
+            pull_res_err = pull_res_json['errorMessage']
+
+        assert pull_res.status_code == 200, "Push: " + str(pull_res_err)
 
         push_res = visa_push_funds(push_api_json)
-        assert push_res.status_code == 200, "Push:" + str(push_res.content)
+        push_res_json = json.loads(push_res.content)
+        push_res_err = str(push_res_json)
+        if 'errorMessage' in push_res_json:
+            push_res_err = push_res_json['errorMessage']
+        assert push_res.status_code == 200, "Push: " + str(push_res_err)
 
         send_confirmation(invoice['email'], f'Payment Confirmation: {code}', f'Payment successfully received for invoice: {code}')
         if 'email' in sender_json:
