@@ -63,10 +63,11 @@ class Invoice(Resource):
 
     def post(self, id=None):
         new_invoice_ref = generateDocRef()
-        try:
-            result = InvoiceSchema().load(json.loads(request.data))
-        except ValidationError:
-            result = InvoiceSignedinSchema().load(json.loads(request.data))
+        in_json = json.loads(request.data)
+        if 'merchantToken' in in_json:
+            result = InvoiceSchema().load(in_json)
+        else:
+            result = InvoiceSignedinSchema().load(in_json)
             decoded_token = auth.verify_id_token(result['merchantToken'])
             del result['merchantToken']
             result['merchantId'] = decoded_token['uid']
