@@ -26,23 +26,19 @@ def visa_pull_funds(json):
     x = visa_api_call(url, methodType=requests.post, headers=headers, json=json)
     return x
 
-def send_confirmation(email, subject, content):
+def send_confirmation(email, data):
     # Send confirmation Email
     message = Mail(
         from_email='pandemic.coders@gmail.com',
         to_emails=email
     )
-    message.dynamic_template_data = {
-        'subject': subject,
-        'content': content
-    }
+    message.dynamic_template_data = data
     message.template_id = 'd-2a96789c5f1c4ee5a612d632f7704937'
     try:
         sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
         response = sg.send(message)
     except Exception as e:
         print(e)
-        print(e.body)
 
 @decorate_all_methods(return_status)
 class Payment(Resource):
@@ -132,9 +128,15 @@ class Payment(Resource):
             push_res_err = push_res_json['errorMessage']
         assert push_res.status_code == 200, "Push: " + str(push_res_err)
 
-        send_confirmation(invoice['email'], f'Payment Confirmation: {code}', f'Payment successfully received for invoice: {code}')
-        if 'email' in sender_json:
-            send_confirmation(sender_json['email'], f'Payment Confirmation: {code}', f'Payment successfully sent for invoice: {code}')
+        data = {
+            'invoiceId': code,
+            'total': str(format(tip + sum([float(item['amount']) for item in invoice['items']]), ".2f")),
+            'items': [{"amount":"%.2f" % item['amount'], "desc":item['desc']} for item in invoice['items']]
+        }
+
+        send_confirmation(invoice['email'], data)
+        if 'email' in sender_json:    
+            send_confirmation(sender_json['email'], data)
        
         # Add the tip to the total if they're signed in
         if merchant_doc_ref is not None and 'tip' in sender_json:
