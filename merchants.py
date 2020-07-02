@@ -7,6 +7,7 @@ from helpers import decorate_all_methods, return_status
 import json
 from db import database
 from db import MerchantsSchema
+from marshmallow import ValidationError
 from firebase_admin import auth
 from functools import wraps
 
