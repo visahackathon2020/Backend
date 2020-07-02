@@ -144,5 +144,8 @@ class Payment(Resource):
             # issue: This could result in concurrent inconsistency
             merchant_doc_ref.update({'tipsTotal': currTotal + tip})
 
+        # Delete the invoice now that payment is successful
+        doc_ref.delete()
+
         return push_res.json()
 
