@@ -27,6 +27,16 @@ def return_status(func):
         try:
             res = func(*args, **kw)
             status = 'success'
+        except AssertionError as e:
+            status = 'fail'
+            logger.error(e, exc_info=True)
+            try:
+                msg = json.loads(str(e))
+            except:
+                msg = str(e)
+            res = {'errorType': str(e.__class__.__name__),
+                   'errorMessage': msg,
+                   'traceback' : str(traceback.format_stack())}
         except ValidationError as e:
             status = 'fail'
             logger.error(e, exc_info=True)

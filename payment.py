@@ -119,14 +119,14 @@ class Payment(Resource):
         if 'errorMessage' in pull_res_json:
             pull_res_err = pull_res_json['errorMessage']
 
-        assert pull_res.status_code == 200, "Push: " + str(pull_res_err)
+        assert pull_res.status_code == 200, '{\"senderPAN\":[\"Pull: '+ str(pull_res_err) +'\"]}'
 
         push_res = visa_push_funds(push_api_json)
         push_res_json = json.loads(push_res.content)
         push_res_err = str(push_res_json)
         if 'errorMessage' in push_res_json:
             push_res_err = push_res_json['errorMessage']
-        assert push_res.status_code == 200, "Push: " + str(push_res_err)
+        assert push_res.status_code == 200, '{\"senderPAN\":[\"Push: '+ str(push_res_err) +'\"]}'
 
         data = {
             'invoiceId': code,

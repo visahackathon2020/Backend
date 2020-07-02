@@ -28,8 +28,11 @@ class Merchant(Resource):
     def get(self, uid=None):
         doc_ref = database.collection(u'merchants').document(uid)
         doc = doc_ref.get()
+        doc_dict = doc.to_dict()
         try:
-            result = MerchantsSchema().load(doc.to_dict()['paymentInfo'])
+            if doc_dict is None or 'paymentInfo' not in doc_dict:
+                return {'docExists':str(doc.exists), 'docPopulated':'false'}
+            result = MerchantsSchema().load(doc_dict['paymentInfo'])
         except ValidationError as err:
             return {'docExists':str(doc.exists), 'docPopulated':'false'}
 
