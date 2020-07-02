@@ -27,7 +27,12 @@ class Merchant(Resource):
     def get(self, uid=None):
         doc_ref = database.collection(u'merchants').document(uid)
         doc = doc_ref.get()
-        return {'docExists':str(doc.exists)}
+        try:
+            result = MerchantsSchema().load(doc.to_dict()['paymentInfo'])
+        except ValidationError as err:
+            return {'docExists':str(doc.exists), 'docPopulated':'false'}
+
+        return {'docExists':str(doc.exists), 'docPopulated':'true'}
 
     # Create a merchant doc
     def post(self, uid=None):
