@@ -48,6 +48,7 @@ class Payment(Resource):
         if load_json is None:
             load_json = json.loads(request.data)
         sender_json = PaymentSchema().load(load_json)
+        print(str(sender_json))
 
         # Get the invoices obj from the given code
         code = sender_json['invoiceId']
@@ -76,7 +77,7 @@ class Payment(Resource):
         retrievalReferenceNumber = now.strftime("%y")[1] + now.strftime("%j%H") + auditNumber
         # Build the push json to send
         api_json = {
-            "amount": str(tip + sum([float(item['amount']) for item in invoice['items']])),
+            "amount": "%.2f" % float(tip + sum([float(item['amount']) for item in invoice['items']])),
             "recipientPrimaryAccountNumber": invoice['PAN'],
             "localTransactionDateTime": now.strftime('%Y-%m-%dT%H:%M:%S'),
             "retrievalReferenceNumber": retrievalReferenceNumber,
@@ -96,6 +97,8 @@ class Payment(Resource):
             }
 
         }
+
+        print('amount', api_json['amount'])
 
         pull_api_json = dict({
             'senderPrimaryAccountNumber': sender_json['senderPAN'],
